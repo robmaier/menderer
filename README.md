@@ -1,9 +1,9 @@
 # Menderer - Batch Mesh Renderer
 
 **Menderer** is a simple OpenGL mesh renderer for batch rendering a 3D triangle mesh into a list of specified camera poses.
-It supports loading of meshes from [PLY (ascii or binary) files](https://en.wikipedia.org/wiki/PLY_(file_format)).
-While various shadings (e.g. [Phong shading](https://en.wikipedia.org/wiki/Phong_shading)) are implemented, there is currently no support for texture maps or normal/displacement maps.
-The tool is written in C++ and can be executed as a standalone commandline application.
+It supports meshes in [PLY (ascii or binary)](https://en.wikipedia.org/wiki/PLY_(file_format)) format.
+While various shadings (e.g. [Phong shading](https://en.wikipedia.org/wiki/Phong_shading)) are implemented, there is currently no support for texture/normal/displacement maps.
+The tool is written in C++ and can be executed as a standalone command line application.
 
 If you find the Menderer source code useful in your research or project, please feel free to cite it as follows:
 ```
@@ -49,34 +49,35 @@ make -j6
 ```
 
 ## Run Menderer
-In the following, we provide a simple usage example for the data ```data/lion/```.
-First, an output folder ```output/``` for the renderings is created:
+In the following, we provide a simple usage example for the data in folder ```data/lion/```.
+First, an output folder ```output/``` is created:
 ```
+# go into data folder
 cd ../data/lion/
+# create output folder
 mkdir output/
 ```
 
-We render the mesh ```mesh.ply``` into a virtual camera, specified by the pinhole camera parameters in ```intrinsics.txt``` and the target pose in ```pose.txt```:
+### Simple example
+We render the mesh ```mesh.ply``` into a virtual camera, which is specified by the pinhole camera parameters in ```intrinsics.txt``` and the target pose in ```pose.txt```:
 ```
 ../../build/bin/Menderer -c intrinsics.txt -t pose.txt -m mesh.ply -o output/
 ```
+Please check the rendered output image ```output/render_000000-color.png```.
 
 Instead of having only a single target camera pose, it is also possible to render the mesh into a list of camera poses ```trajectory.txt``` ([TUM RGB-D Benchmark trajectory format](https://vision.in.tum.de/data/datasets/rgbd-dataset/file_formats)):
 ```
 ../../build/bin/Menderer -c intrinsics.txt -t trajectory.txt -m mesh.ply -o output/
 ```
-The output images are generated in the ```output/``` subfolder.
+Again, the output images ```render_xxxxxx-color.png``` are generated in the ```output/``` subfolder.
 
 
-### Mesh Format
-Since Menderer can only load meshes from .ply files, we recommend [Meshlab](http://www.meshlab.net/) for converting meshes in other formats (e.g. .obj, .wrl, etc.) to the .ply format.
-
-### Intrinsic3D Format
-In addition to the format for camera intrinsics (```intrinsics.txt```) and poses (```pose.txt``` / ```trajectory.txt```) above, we also support the [Intrinsic3D dataset format](https://vision.in.tum.de/data/datasets/intrinsic3d).
-We show an example for downloading and rendering the ```Tomb Statuary``` data in the following:
+### Intrinsic3D format
+In addition to the format above (```intrinsics.txt``` and ```pose.txt```/```trajectory.txt```) , we also support the [Intrinsic3D dataset format](https://vision.in.tum.de/data/datasets/intrinsic3d).
+We show an example for downloading and rendering the *Intrinsic3D Tomb Statuary* data in the following:
 
 ```
-# cd into data/ folder again
+# go into data/ folder again
 cd ../
 # create folder for dataset
 mkdir tomb
@@ -87,7 +88,7 @@ mkdir output/
 # download, extract and rename mesh
 wget https://vision.in.tum.de/_media/data/datasets/intrinsic3d/tomb-statuary-intrinsic3d.zip
 unzip tomb-statuary-intrinsic3d.zip
-mv tomb-statuary-intrinsic3d mesh.ply
+mv tomb-statuary-intrinsic3d.ply mesh.ply
 
 # download, extract and rename rgbd (with intrinsics and poses)
 wget https://vision.in.tum.de/_media/data/datasets/intrinsic3d/tomb-statuary-rgbd.zip
@@ -100,98 +101,78 @@ After preparing the dataset, we can batch-render the mesh into the provided inpu
 ../../build/bin/Menderer -d rgbd/ -m mesh.ply -o output/
 ```
 
+### Mesh format
+Since Menderer can only load meshes from .ply files, we recommend [Meshlab](http://www.meshlab.net/) for converting meshes in other formats (e.g. .obj, .wrl, etc.) to the .ply format.
+
 
 ### Command line arguments
-
-
+There are various command line options for the ```Menderer``` application in order to adjust the renderings and output options.
 ```
-// input files
-std::string cam_intrinsics_file;
-CLI::Option* opt_cam = app.add_option("-c,--camera", cam_intrinsics_file,
-                                        "Camera intrinsics file")
-        ->check(CLI::ExistingFile);
-std::string trajectory_file;
-CLI::Option* opt_traj = app.add_option("-t,--trajectory", trajectory_file, "Camera trajectory file (TUM RGB-D benchmark format)")
-        ->check(CLI::ExistingFile)->needs(opt_cam);
-std::string dataset_folder;
-app.add_option("-d,--dataset", dataset_folder, "Dataset folder (Intrinsic3D format)")
-        ->check(CLI::ExistingDirectory)->excludes(opt_traj);
-std::string mesh_file;
-app.add_option("-m,--mesh", mesh_file, "Input mesh file")
-        ->required()->check(CLI::ExistingFile);
+Input parameters (mandatory):
+-c,--camera             Camera intrinsics filename (file must exist).
+-t,--trajectory         Camera trajectory file in TUM RGB-D benchmark format (file must exist).
+-d,--dataset"           Dataset folder in Intrinsic3D format (folder must exist).
+                        Either both options -c and -t or just option -d must be specified.
+-m,--mesh"              Input mesh file (file must exist).
 
-// output folder
-std::string output_folder;
-app.add_option("-o,--output", output_folder, "Output folder")
-        ->check(CLI::ExistingDirectory);
+Output parameters (optional):
+-o,--output             Output folder (folder must exist and must be empty).
+Output flags (optional, without arguments):
+--save_depth_png        Save rendered depth (.png files) in output folder.
+--save_depth_binary     Save rendered depth (.bin files) in output folder.
 
-// options for saving rendered depth as .png/.bin
-bool save_depth_png;
-app.add_flag("--save_depth_png", save_depth_png, "Save rendered depth (.png)");
-bool save_depth_bin;
-app.add_flag("--save_depth_binary", save_depth_bin, "Save rendered depth (binary)");
+GUI flags (optional, without arguments):
+--gui                   Show GUI for rendered color
+--pause                 Pause after each frame (continue with any button/space)
 
-// GUI parameters
-bool gui = false;
-app.add_flag("--gui", gui, "Show GUI");
-bool gui_pause = false;
-app.add_flag("--pause", gui_pause, "Pause after showing rendered frame");
+Renderer parameters (optional):
+--shader                OpenGL rendering shader (options: "none", 
+                        "normals_phong" (default), "phong", "normals").
+--color_r               Mesh color (red channel).
+--color_b               Mesh color (blue channel).
+--color_g               Mesh color (green channel).
+--bg_r                  Rendering background color (red channel).
+--bg_b                  Rendering background color (blue channel).
+--bg_g                  Rendering background color (green channel).
 
-// renderer parameters
-menderer::ogl::MeshRenderer::Config renderer_cfg;
-
-// initialize and configure mesh scene
-// mesh color
-float color_r = 1.0f;
-app.add_option("--color_r", color_r, "Mesh color (red)");
-float color_b = 0.9f;
-app.add_option("--color_b", color_b, "Mesh color (blue)");
-float color_g = 0.75f;
-app.add_option("--color_g", color_g, "Mesh color (green)");
-// render background color
-float bg_r = 0.0f;
-app.add_option("--bg_r", bg_r, "Rendering background (red)");
-float bg_b = 0.0f;
-app.add_option("--bg_b", bg_b, "Rendering background (blue)");
-float bg_g = 0.0f;
-app.add_option("--bg_g", bg_g, "Rendering background (green)");
-// enable scene lighting
-renderer_cfg.lighting = false;
-app.add_flag("--lighting", renderer_cfg.lighting, "Enable lighting");
-// enable mesh colors
-renderer_cfg.colored = false;
-app.add_flag("--colored", renderer_cfg.colored, "Enable mesh colors");
-// configure flat/smooth rendering
-bool flat = false;
-app.add_flag("--flat", flat, "Enable flat rendering");
-// configure OpenGL shader
-// "none", "normals_phong", "phong"
-renderer_cfg.shader = "normals_phong";
-app.add_option("--shader", renderer_cfg.shader, "OpenGL rendering shader (default: normals_phong)");
+Renderer flags (optional, without arguments):
+--lighting      Enable lighting (default false).
+--colored       Enable mesh colors (default false).
+--flat          Enable flat rendering (default false, i.e. smooth).
 ```
 
-    
+### Example rendering modes
+The following command line options demonstrate the use of implemented rendering modes:
+```
+1) Phong shading with normals as surface colors (default):
+--shader phong_normals
+
+2) Phong shading with uniform (gray) surface colors:
+--shader phong --color_r 0.5 --color_g 0.5 --color_b 0.5
+
+3) Render vertex colors without geometry/lighting:
+--shader none --colored
+
+4) Render normals (without Phong shading and geometry/lighting):
+--shader normals
+```
+
 
 ### Load exported depth in Matlab
-
-load binary depth in matlab
-
+When the ```--save_depth_binary``` flag is specified, the binary depth images ```render_xxxxxx-depth.bin``` are additionally generated in the ```output/``` subfolder.
+The following code snippet shows how to load a binary depth map in Matlab (assumed the rendering resolution is 640x480).
 ```
 % read file into matrix A
 fileID = fopen('out_0.bin');
 A = fread(fileID,[640, 480],'float');
 fclose(fileID);
-
 % permute dimensions (account for row-major/column-major)
 A = permute(A,[2 1]);
-
 % convert A to grayscale image
 I = mat2gray(A);
-
 % show image
 imshow(I);
 ```
-
 
 
 ## License
