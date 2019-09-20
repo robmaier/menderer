@@ -123,19 +123,31 @@ int main(int argc, char *argv[])
     renderer_cfg.print();
 
     // create OpenGL context
-    assert(menderer::ogl::createContext());
+    if (!menderer::ogl::createContext())
+    {
+        std::cerr << "could not create OpenGL context!" << std::endl;
+        return 1;
+    }
 
     // load dataset
     menderer::Dataset dataset;
     if (dataset_folder.empty())
     {
         // load camera intrinsics and trajectory
-        assert(dataset.load(cam_intrinsics_file, trajectory_file));
+        if (!dataset.load(cam_intrinsics_file, trajectory_file))
+        {
+            std::cerr << "could not load dataset from files!" << std::endl;
+            return 1;
+        }
     }
     else
     {
         // load full Intrinsic3D dataset
-        assert(dataset.load(dataset_folder));
+        if (!dataset.load(dataset_folder))
+        {
+            std::cerr << "could not load Intrinsic3D dataset!" << std::endl;
+            return 1;
+        }
     }
 
     // print loaded camera intrinsics
@@ -143,7 +155,11 @@ int main(int argc, char *argv[])
     camera.print();
     // check trajectory and print number of poses
     auto& trajectory = dataset.trajectory();
-    assert(!trajectory.empty());
+    if (trajectory.empty())
+    {
+        std::cerr << "trajectory is empty!" << std::endl;
+        return 1;
+    }
     //trajectory.print();
     std::cout << "trajectory: " << trajectory.size() << " poses" << std::endl;
 
