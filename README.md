@@ -2,7 +2,7 @@
 
 **Menderer** is a simple OpenGL mesh renderer for batch rendering a 3D triangle mesh into a list of specified camera poses.
 It supports meshes in [PLY (ascii or binary)](https://en.wikipedia.org/wiki/PLY_(file_format)) format.
-While various shadings (e.g. [Phong shading](https://en.wikipedia.org/wiki/Phong_shading)) are implemented, there is currently no support for texture/normal/displacement maps.
+While various shadings (e.g. [Phong shading](https://en.wikipedia.org/wiki/Phong_shading)) are implemented, there is currently no support for texture/normal maps.
 The tool is written in C++ and can be executed as a standalone command line application.
 
 If you find the Menderer source code useful in your research or project, please feel free to cite it as follows:
