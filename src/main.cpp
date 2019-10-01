@@ -120,6 +120,8 @@ int main(int argc, char *argv[])
     renderer_cfg.color = menderer::Vec4f(color_r, color_b, color_g, 1.0f);
     renderer_cfg.background = menderer::Vec4f(bg_r, bg_b, bg_g, 1.0f);
     renderer_cfg.smooth = !flat;
+    if ((renderer_cfg.shader.empty() || renderer_cfg.shader == "none") && !renderer_cfg.colored)
+        renderer_cfg.lighting = true;
     renderer_cfg.print();
 
     // create OpenGL context
