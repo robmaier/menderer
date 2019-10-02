@@ -164,4 +164,46 @@ namespace menderer
         height_ = 480;
     }
 
+
+    bool Camera::project(const Vec3f &pt, Vec2f &pt2f, Vec2i &pt2i) const
+    {
+        // shorthands
+        const float fx = static_cast<float>(K_(0, 0));
+        const float fy = static_cast<float>(K_(1, 1));
+        const float cx = static_cast<float>(K_(0, 2));
+        const float cy = static_cast<float>(K_(1, 2));
+
+        // compute normalized 2D point (project 3d point onto image plane)
+        float x = pt[0] / pt[2];
+        float y = pt[1] / pt[2];
+        // convert point to pixel coordinates and apply center pixel offset
+        pt2f[0] = fx * x + cx;
+        pt2f[1] = fy * y + cy;
+        // compute integer 2D image coordinates (round to nearest integer)
+        pt2i = Vec2i(static_cast<int>(pt2f[0] + 0.5f), static_cast<int>(pt2f[1] + 0.5f));
+        // check if points is within image bounds
+        if (pt2i[0] < 0 || pt2i[0] >= width_ || pt2i[1] < 0 || pt2i[1] >= height_)
+            return false;
+        return true;
+    }
+
+
+    Vec3f Camera::unproject(int x, int y, float depth) const
+    {
+        // shorthands
+        const float fx_inv = 1.0f / static_cast<float>(K_(0, 0));
+        const float fy_inv = 1.0f / static_cast<float>(K_(1, 1));
+        const float cx = static_cast<float>(K_(0, 2));
+        const float cy = static_cast<float>(K_(1, 2));
+
+        Vec3f pt = Vec3f::Zero();
+        if (depth != 0.0f && !std::isnan(depth))
+        {
+            pt[0] = (float(x) - cx) * fx_inv * depth;
+            pt[1] = (float(y) - cy) * fy_inv * depth;
+            pt[2] = depth;
+        }
+        return pt;
+    }
+
 } // namespace menderer

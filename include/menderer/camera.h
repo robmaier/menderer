@@ -70,6 +70,12 @@ namespace menderer
         /// Print pinhole camera model parameters.
         void print() const;
 
+        /// Projects a point from 3D into 2D image.
+        bool project(const Vec3f &pt, Vec2f &pt2f, Vec2i &pt2i) const;
+
+        /// Unprojects a 2D image point back to 3D using its depth.
+        Vec3f unproject(int x, int y, float depth) const;
+
     private:
         /// Reset pinhole camera model parameters to default values.
         void reset();
