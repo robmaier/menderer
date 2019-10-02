@@ -224,4 +224,35 @@ namespace menderer
         return true;
     }
 
+
+    bool Dataset::depthToVertexMap(const cv::Mat &depth, cv::Mat &vertex_map) const
+    {
+        if (depth.type() != CV_32FC1)
+            return false;
+
+        const int w = depth.cols;
+        const int h = depth.rows;
+        vertex_map = cv::Mat::zeros(h, w, CV_32FC3);
+        float* ptr_vert = reinterpret_cast<float*>(vertex_map.data);
+
+        for (int y = 0; y < h; ++y)
+        {
+            for (int x = 0; x < w; ++x)
+            {
+                const float d = depth.at<float>(y, x);
+                if (d == 0.0f || std::isnan(d))
+                    continue;
+
+                Vec3f pt3 = camera_.unproject(x, y, d);
+
+                size_t off = static_cast<size_t>(y*w + x) * 3;
+                ptr_vert[off] = pt3[0];
+                ptr_vert[off+1] = pt3[1];
+                ptr_vert[off+2] = pt3[2];
+            }
+        }
+
+        return true;
+    }
+
 } // namespace menderer

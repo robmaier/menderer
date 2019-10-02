@@ -85,6 +85,9 @@ namespace menderer
         /// Save a depth map as binary file.
         static bool saveDepthBinary(const std::string &filename, const cv::Mat& depth);
 
+        /// Compute a 3D vertex map from a depth map using the camera intrinsics.
+        bool depthToVertexMap(const cv::Mat &depth, cv::Mat &vertexMap) const;
+
     private:
         /// Retrieves the files of an Intrinsic3D dataset.
         bool listFiles(const std::string &dataset_folder,
