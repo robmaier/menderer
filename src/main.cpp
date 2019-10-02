@@ -63,6 +63,9 @@ int main(int argc, char *argv[])
     std::string mesh_file;
     app.add_option("-m,--mesh", mesh_file, "Input mesh file")
             ->required()->check(CLI::ExistingFile);
+    // output folder
+    int max_frames = 0;
+    app.add_option("--max_frames", max_frames, "Maximum number of input frames to process");
 
     // output folder
     std::string output_folder;
@@ -72,6 +75,8 @@ int main(int argc, char *argv[])
     // options for saving rendered depth as .png/.bin
     bool save_depth_png;
     app.add_flag("--save_depth_png", save_depth_png, "Save rendered depth (.png)");
+    bool save_mesh;
+    app.add_flag("--save_mesh", save_mesh, "Save rendered depth as mesh (.ply)");
     bool save_depth_bin;
     app.add_flag("--save_depth_binary", save_depth_bin, "Save rendered depth (binary)");
 
@@ -207,6 +212,9 @@ int main(int argc, char *argv[])
     std::cout << "rendering " << num_frames << " frames ..." << std::endl;
     for (size_t i = 0; i < num_frames; ++i)
     {
+        if (max_frames > 0 && i >= static_cast<size_t>(max_frames))
+            break;
+
         std::cout << "   frame " << (i + 1) << " of " << num_frames << std::endl;
 
         // render mesh into current target pose
@@ -237,6 +245,22 @@ int main(int argc, char *argv[])
                 std::string output_file_depth_png = output_file_prefix + "-depth.png";
                 std::cout << "   saving depth (.png) to " << output_file_depth_png << " ..." << std::endl;
                 menderer::Dataset::saveDepthPNG(output_file_depth_png, rendered_depth);
+            }
+            if (save_mesh)
+            {
+                // compute vertex map from depth
+                cv::Mat rendered_vertex_map;
+                dataset.depthToVertexMap(rendered_depth, rendered_vertex_map);
+                // compute mesh from rgb-d frame
+                menderer::Mesh mesh_rgbd;
+                if (menderer::MeshUtil::createFromRGBD(rendered_vertex_map, rendered_color,
+                                                       pose_world_to_cam.inverse(), mesh_rgbd))
+                {
+                    // save mesh
+                    std::string output_file_ply = output_file_prefix + "-mesh.ply";
+                    std::cout << "   saving mesh (.ply) to " << output_file_ply << " ..." << std::endl;
+                    menderer::PlyIO::save(output_file_ply, mesh_rgbd, false);
+                }
             }
             if (save_depth_bin)
             {

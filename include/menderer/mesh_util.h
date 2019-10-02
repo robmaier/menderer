@@ -42,6 +42,10 @@ namespace menderer
         /// Compress mesh vertices by removing redundant/duplicate vertices.
         static void compressVertices(Mesh &mesh);
 
+        /// Create mesh from RGB-D frame.
+        static bool createFromRGBD(const cv::Mat &vertex_map, const cv::Mat &color,
+                                   const Mat4 &pose_cam_to_world, Mesh &mesh);
+
     private:
         /// Compute the per-triangle face normals for all faces of a mesh.
         static void computeFaceNormals(const Mesh &mesh, std::vector<Vec3> &faceNormals);

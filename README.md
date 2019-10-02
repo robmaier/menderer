@@ -120,6 +120,8 @@ Output parameters (optional):
 Output flags (optional, without arguments):
 --save_depth_png        Save rendered depth (.png files) in output folder.
 --save_depth_binary     Save rendered depth (.bin files) in output folder.
+--save_mesh             Triangulate rendered depth and save generated mesh
+                        as .ply file in output folder.
 
 GUI flags (optional, without arguments):
 --gui                   Show GUI for rendered color

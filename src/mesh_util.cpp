@@ -218,4 +218,116 @@ namespace menderer
     }
 
 
+    bool MeshUtil::createFromRGBD(const cv::Mat &vertex_map, const cv::Mat &color,
+                                  const Mat4 &pose_cam_to_world, Mesh &mesh)
+    {
+        if (vertex_map.empty())
+            return false;
+
+        // clear mesh
+        mesh.clear();
+
+        // thresholds for triangle generation
+        const double depth_threshold = 5.0;
+        const double edge_threshold = 0.05;
+
+        // reference frame data
+        const int w = vertex_map.cols;
+        const int h = vertex_map.rows;
+        const float* ptr_vert = reinterpret_cast<const float*>(vertex_map.data);
+        bool has_colors = !color.empty();
+        if (has_colors && color.type() != CV_8UC3)
+            return false;
+        const unsigned char* ptr_color = reinterpret_cast<unsigned char*>(color.data);
+
+        // triangulate depth
+        for (int y = 0; y < h - 1; ++y)
+        {
+            for (int x = 0; x < w - 1; ++x)
+            {
+                // vertex indices
+                int idx00 = 3 * (y * w + x);
+                int idx10 = 3 * (y * w + x + 1);
+                int idx01 = 3 * ((y + 1) * w + x);
+                int idx11 = 3 * ((y + 1) * w + x + 1);
+
+                // get points
+                Vec3 p00(ptr_vert[idx00], ptr_vert[idx00 + 1], ptr_vert[idx00 + 2]);
+                Vec3 p10(ptr_vert[idx10], ptr_vert[idx10 + 1], ptr_vert[idx10 + 2]);
+                Vec3 p01(ptr_vert[idx01], ptr_vert[idx01 + 1], ptr_vert[idx01 + 2]);
+                Vec3 p11(ptr_vert[idx11], ptr_vert[idx11 + 1], ptr_vert[idx11 + 2]);
+
+                // check depth
+                if (std::isnan(p00[2]) || std::isnan(p10[2]) || std::isnan(p01[2]) || std::isnan(p11[2]))
+                    continue;
+                if (p00[2] <= 0.0 || p10[2] <= 0.0 || p01[2] <= 0.0 || p11[2] <= 0.0)
+                    continue;
+                if (p00[2] > depth_threshold ||
+                        p10[2] > depth_threshold ||
+                        p01[2] > depth_threshold ||
+                        p11[2] > depth_threshold)
+                    continue;
+
+                //check edge length
+                if ((p00 - p01).norm() > edge_threshold ||
+                        (p00 - p10).norm() > edge_threshold ||
+                        (p10 - p01).norm() > edge_threshold ||
+                        (p11 - p01).norm() > edge_threshold ||
+                        (p11 - p10).norm() > edge_threshold)
+                    continue;
+
+                // transform into world coordinate system
+                p00 = pose_cam_to_world.topLeftCorner<3, 3>() * p00 + pose_cam_to_world.topRightCorner<3, 1>();
+                p10 = pose_cam_to_world.topLeftCorner<3, 3>() * p10 + pose_cam_to_world.topRightCorner<3, 1>();
+                p01 = pose_cam_to_world.topLeftCorner<3, 3>() * p01 + pose_cam_to_world.topRightCorner<3, 1>();
+                p11 = pose_cam_to_world.topLeftCorner<3, 3>() * p11 + pose_cam_to_world.topRightCorner<3, 1>();
+
+                // insert vertices
+                unsigned int v00 = static_cast<unsigned int>(mesh.vertices.size());
+                mesh.vertices.push_back(p00);
+                unsigned int v10 = static_cast<unsigned int>(mesh.vertices.size());
+                mesh.vertices.push_back(p10);
+                unsigned int v01 = static_cast<unsigned int>(mesh.vertices.size());
+                mesh.vertices.push_back(p01);
+                unsigned int v11 = static_cast<unsigned int>(mesh.vertices.size());
+                mesh.vertices.push_back(p11);
+
+                if (has_colors)
+                {
+                    // insert vertex colors
+                    Vec3b c00(ptr_color[idx00 + 2], ptr_color[idx00 + 1], ptr_color[idx00]);
+                    mesh.colors.push_back(c00);
+                    Vec3b c10(ptr_color[idx10 + 2], ptr_color[idx10 + 1], ptr_color[idx10]);
+                    mesh.colors.push_back(c10);
+                    Vec3b c01(ptr_color[idx01 + 2], ptr_color[idx01 + 1], ptr_color[idx01]);
+                    mesh.colors.push_back(c01);
+                    Vec3b c11(ptr_color[idx11 + 2], ptr_color[idx11 + 1], ptr_color[idx11]);
+                    mesh.colors.push_back(c11);
+                }
+
+                // insert triangles (prefer smaller diagonal to form triangles)
+                Vec3ui face0;
+                Vec3ui face1;
+                if ((p11 - p00).norm() < (p01 - p10).norm())
+                {
+                    face0 = Vec3ui(v00, v01, v11);
+                    face1 = Vec3ui(v11, v10, v00);
+                }
+                else
+                {
+                    face0 = Vec3ui(v00, v01, v10);
+                    face1 = Vec3ui(v10, v01, v11);
+                }
+                mesh.face_vertices.push_back(face0);
+                mesh.face_vertices.push_back(face1);
+            }
+        }
+
+        // compress mesh vertices, otherwise unnecessarily many vertices
+        compressVertices(mesh);
+
+        return true;
+    }
+
+
 } // namespace menderer
