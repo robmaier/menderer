@@ -75,10 +75,10 @@ int main(int argc, char *argv[])
     // options for saving rendered depth as .png/.bin
     bool save_depth_png;
     app.add_flag("--save_depth_png", save_depth_png, "Save rendered depth (.png)");
-    bool save_mesh;
-    app.add_flag("--save_mesh", save_mesh, "Save rendered depth as mesh (.ply)");
     bool save_depth_bin;
     app.add_flag("--save_depth_binary", save_depth_bin, "Save rendered depth (binary)");
+    bool save_mesh;
+    app.add_flag("--save_mesh", save_mesh, "Save rendered depth as mesh (.ply)");
 
     // GUI parameters
     bool gui = false;
