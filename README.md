@@ -119,6 +119,7 @@ Output parameters (optional):
 -o,--output             Output folder (folder must exist and must be empty).
 Output flags (optional, without arguments):
 --save_depth_png        Save rendered depth (.png files) in output folder.
+                        (Divide by scale factor 5000.0 to get metric depth)
 --save_depth_binary     Save rendered depth (.bin files) in output folder.
 --save_mesh             Triangulate rendered depth and save generated mesh
                         as .ply file in output folder.
