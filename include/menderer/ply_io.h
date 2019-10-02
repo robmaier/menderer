@@ -40,6 +40,9 @@ namespace menderer
         /// Load ply file using happly library.
         static bool load(const std::string &filename, Mesh &mesh);
 
+        /// Save mesh to ply file using happly library.
+        static bool save(const std::string &filename, const Mesh &mesh, bool format_binary = true);
+
     private:
         /// Internal helper function for retrieving vertex normals from ply file.
         static std::vector<std::array<double, 3>> getVertexNormals(happly::PLYData& data);

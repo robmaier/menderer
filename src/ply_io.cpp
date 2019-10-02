@@ -115,4 +115,71 @@ namespace menderer
     }
 
 
+    bool PlyIO::save(const std::string &filename, const Mesh &mesh, bool format_binary)
+    {
+        if (filename.empty())
+            return false;
+
+        try
+        {
+            // output containers
+            std::vector<std::array<double, 3> > mesh_verts_out;
+            std::vector<std::array<unsigned char, 3> > mesh_colors_out;
+            std::vector<std::vector<size_t> > mesh_faces_out;
+
+            // fill output containers from mesh
+
+            // vertex positions
+            mesh_verts_out.resize(mesh.vertices.size());
+            for (size_t i = 0; i < mesh.vertices.size(); ++i)
+            {
+                const auto& v = mesh.vertices[i];
+                std::array<double, 3> v_out;
+                v_out[0] = v[0];
+                v_out[1] = v[1];
+                v_out[2] = v[2];
+                mesh_verts_out[i] = v_out;
+            }
+
+            // vertex colors
+            mesh_colors_out.resize(mesh.colors.size());
+            for (size_t i = 0; i < mesh.colors.size(); ++i)
+            {
+                const auto& c = mesh.colors[i];
+                std::array<unsigned char, 3> c_out;
+                c_out[0] = c[0];
+                c_out[1] = c[1];
+                c_out[2] = c[2];
+                mesh_colors_out[i] = c_out;
+            }
+
+            // faces
+            mesh_faces_out.resize(mesh.face_vertices.size());
+            for (size_t i = 0; i < mesh.face_vertices.size(); ++i)
+            {
+                const auto& ind = mesh.face_vertices[i];
+                assert(ind.size() == 3);
+                std::vector<size_t> ind_out(3);
+                ind_out[0] = static_cast<size_t>(ind[0]);
+                ind_out[1] = static_cast<size_t>(ind[1]);
+                ind_out[2] = static_cast<size_t>(ind[2]);
+                mesh_faces_out[i] = ind_out;
+            }
+
+            // save ply file using happly
+            happly::PLYData ply_out;
+            ply_out.addVertexPositions(mesh_verts_out);
+            ply_out.addVertexColors(mesh_colors_out);
+            ply_out.addFaceIndices(mesh_faces_out);
+            happly::DataFormat fmt = format_binary ? happly::DataFormat::Binary : happly::DataFormat::ASCII;
+            ply_out.write(filename, fmt);
+        }
+        catch (...)
+        {
+            return false;
+        }
+
+        return true;
+    }
+
 } // namespace menderer
