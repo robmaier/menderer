@@ -73,7 +73,7 @@ Again, the output images ```render_xxxxxx-color.png``` are generated in the ```o
 
 
 ### Intrinsic3D format
-In addition to the format above (```intrinsics.txt``` and ```pose.txt```/```trajectory.txt```) , we also support the [Intrinsic3D dataset format](https://vision.in.tum.de/data/datasets/intrinsic3d).
+In addition to the format above (```intrinsics.txt``` and ```pose.txt```/```trajectory.txt```) , we also support [Intrinsic3D dataset folders](https://vision.in.tum.de/data/datasets/intrinsic3d).
 We show an example for downloading and rendering the *Intrinsic3D Tomb Statuary* data in the following:
 
 ```
