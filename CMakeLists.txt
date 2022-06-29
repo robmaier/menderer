@@ -26,7 +26,7 @@
 #==============================================================================
 
 #==============================================================================
-CMAKE_MINIMUM_REQUIRED(VERSION 2.6 FATAL_ERROR)
+CMAKE_MINIMUM_REQUIRED(VERSION 2.8.12 FATAL_ERROR)
 PROJECT(Menderer C CXX)
 
 #==============================================================================
@@ -43,7 +43,7 @@ SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
 INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/third_party/include/)
 
 # OpenCV
-FIND_PACKAGE(OpenCV 3.0.0 COMPONENTS core highgui imgproc REQUIRED)
+FIND_PACKAGE(OpenCV 4.0.0 COMPONENTS core highgui imgproc REQUIRED)
 IF(OPENCV_CORE_FOUND)
     INCLUDE_DIRECTORIES(${OpenCV_INCLUDE_DIRS})
 ENDIF()
@@ -58,8 +58,8 @@ MESSAGE(STATUS "OpenGL (include ${OPENGL_INCLUDE_DIR}, libs ${OPENGL_LIBRARIES}"
 SET(GLFW_BUILD_DOCS OFF CACHE BOOL "Build the GLFW docs")
 SET(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "Build the GLFW example programs")
 SET(GLFW_BUILD_TESTS OFF CACHE BOOL "Build the GLFW tests")
-ADD_SUBDIRECTORY(${PROJECT_SOURCE_DIR}/third_party/glfw-3.3/)
-INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/third_party/glfw-3.3/include)
+ADD_SUBDIRECTORY(${PROJECT_SOURCE_DIR}/third_party/glfw-3.3.7/)
+INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/third_party/glfw-3.3.7/include)
 
 #==============================================================================
 # Build Menderer application

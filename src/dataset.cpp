@@ -136,7 +136,7 @@ namespace menderer
         if (id >= files_depth_.size() || files_depth_.empty())
             return cv::Mat();
         // read 16-bit depth image
-        cv::Mat depth16 = cv::imread(files_depth_[id], CV_LOAD_IMAGE_ANYDEPTH | CV_LOAD_IMAGE_ANYCOLOR);
+        cv::Mat depth16 = cv::imread(files_depth_[id], cv::IMREAD_ANYDEPTH | cv::IMREAD_ANYCOLOR);
         // convert 16-bit depth image to float
         cv::Mat depth;
         depth16.convertTo(depth, CV_32FC1, (1.0 / 1000.0));
