@@ -31,12 +31,13 @@ Menderer requires
 [OpenCV 4](https://opencv.org/releases.html),
 [Eigen](http://eigen.tuxfamily.org/),
 [CLI11](https://github.com/CLIUtils/CLI11/),
+[GLEW](http://glew.sourceforge.net/),
 [GLFW3](https://www.glfw.org/),
 [happly](https://github.com/nmwsharp/happly)
 as third-party dependencies.
 While Eigen, CLI11 and GLFW3 are already contained in the ```third_party``` folder, the other dependencies can be installed directly from the default Ubuntu repositories:
 ```
-sudo apt install cmake libopencv-dev
+sudo apt install cmake libopencv-dev libglew-dev
 ```
 
 ### Build Menderer

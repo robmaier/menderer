@@ -109,7 +109,7 @@ namespace ogl
 
         // detach attached textures
         for (size_t i = 0; i < draw_buffers_.size(); ++i)
-            glFramebufferTexture(GL_FRAMEBUFFER, draw_buffers_[i], 0, 0);
+            glFramebufferTextureEXT(GL_FRAMEBUFFER, draw_buffers_[i], 0, 0);
         // clear attachments
         draw_buffers_.clear();
 

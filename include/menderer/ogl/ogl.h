@@ -20,8 +20,10 @@
 
 #pragma once
 
-// define GL_GLEXT_PROTOTYPES for using glGenBuffers etc
-#define GL_GLEXT_PROTOTYPES
+#include <GL/glew.h>
+
+// define for using glGenBuffers etc
+#define GLFW_INCLUDE_GLEXT
 // include GLFW (which also includes all required OpenGL headers)
 #include <GLFW/glfw3.h>
 
@@ -54,6 +56,10 @@ namespace ogl
             return false;
         }
         glfwMakeContextCurrent(ogl_context);
+
+        // Initialize GLEW
+        glewExperimental = GL_TRUE; 
+        glewInit();
 
         return true;
     }
