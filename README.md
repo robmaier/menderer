@@ -28,7 +28,7 @@ git clone https://github.com/robmaier/menderer.git
 ### Dependencies
 Menderer requires
 [CMake](https://cmake.org/download/),
-[OpenCV 3](https://opencv.org/releases.html),
+[OpenCV 4](https://opencv.org/releases.html),
 [Eigen](http://eigen.tuxfamily.org/),
 [CLI11](https://github.com/CLIUtils/CLI11/),
 [GLFW3](https://www.glfw.org/),
